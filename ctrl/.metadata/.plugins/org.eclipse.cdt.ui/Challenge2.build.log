@@ -1,0 +1,43 @@
+14:48:45 **** Build of configuration Debug for project Challenge2 ****
+make all 
+Building file: ../Challenge2.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"Challenge2.d" -MT"Challenge2.o" -c -o "Challenge2.o" "../Challenge2.c"
+Finished building: ../Challenge2.c
+ 
+Building file: ../uart.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"uart.d" -MT"uart.o" -c -o "uart.o" "../uart.c"
+Finished building: ../uart.c
+ 
+Building target: Challenge2.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,Challenge2.map -mmcu=atmega32 -o "Challenge2.elf"  ./Challenge2.o ./uart.o   
+Finished building target: Challenge2.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S Challenge2.elf  >"Challenge2.lss"
+Finished building: Challenge2.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex Challenge2.elf  "Challenge2.hex"
+Finished building: Challenge2.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 Challenge2.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:     660 bytes (2.0% Full)
+(.text + .data + .bootloader)
+
+Data:          0 bytes (0.0% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+14:48:45 Build Finished. 0 errors, 0 warnings. (took 703ms)
+

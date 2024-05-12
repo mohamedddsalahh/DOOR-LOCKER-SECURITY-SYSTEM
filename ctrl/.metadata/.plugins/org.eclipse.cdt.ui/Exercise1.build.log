@@ -1,0 +1,49 @@
+14:48:47 **** Build of configuration Debug for project Exercise1 ****
+make all 
+Building file: ../Exercise1.c
+Invoking: AVR Compiler
+avr-gcc -DF_CPU=1000000UL -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"Exercise1.d" -MT"Exercise1.o" -c -o "Exercise1.o" "../Exercise1.c"
+<command-line>: warning: "F_CPU" redefined
+<command-line>: warning: this is the location of the previous definition
+../Exercise1.c: In function 'main':
+../Exercise1.c:14: warning: unused variable 'Str'
+Finished building: ../Exercise1.c
+ 
+Building file: ../uart.c
+Invoking: AVR Compiler
+avr-gcc -DF_CPU=1000000UL -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"uart.d" -MT"uart.o" -c -o "uart.o" "../uart.c"
+<command-line>: warning: "F_CPU" redefined
+<command-line>: warning: this is the location of the previous definition
+Finished building: ../uart.c
+ 
+Building target: Exercise1.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,Exercise1.map -mmcu=atmega32 -o "Exercise1.elf"  ./Exercise1.o ./uart.o   
+Finished building target: Exercise1.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S Exercise1.elf  >"Exercise1.lss"
+Finished building: Exercise1.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex Exercise1.elf  "Exercise1.hex"
+Finished building: Exercise1.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 Exercise1.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:     670 bytes (2.0% Full)
+(.text + .data + .bootloader)
+
+Data:          0 bytes (0.0% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+14:48:48 Build Finished. 0 errors, 1 warnings. (took 709ms)
+

@@ -1,0 +1,41 @@
+14:48:51 **** Build of configuration Debug for project Exercise3_MC1 ****
+make all 
+Building file: ../MC1.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=1000000UL -MMD -MP -MF"MC1.d" -MT"MC1.o" -c -o "MC1.o" "../MC1.c"
+../MC1.c: In function 'main':
+../MC1.c:23: warning: pointer targets in passing argument 1 of 'UART_sendString' differ in signedness
+Finished building: ../MC1.c
+ 
+Building file: ../uart.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=1000000UL -MMD -MP -MF"uart.d" -MT"uart.o" -c -o "uart.o" "../uart.c"
+Finished building: ../uart.c
+ 
+Building target: Exercise3_MC1.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,Exercise3_MC1.map -mmcu=atmega32 -o "Exercise3_MC1.elf"  ./MC1.o ./uart.o   
+Finished building target: Exercise3_MC1.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S Exercise3_MC1.elf  >"Exercise3_MC1.lss"
+Finished building: Exercise3_MC1.lss
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 Exercise3_MC1.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:     698 bytes (2.1% Full)
+(.text + .data + .bootloader)
+
+Data:         14 bytes (0.7% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+14:48:51 Build Finished. 0 errors, 1 warnings. (took 605ms)
+

@@ -1,0 +1,202 @@
+/*
+ * HMI.c
+ *
+ *  Created on: Oct 31, 2022
+ *      Author: USER
+ */
+#include "HMI.h"
+#include <util/delay.h>
+#include "std_types.h"
+
+#include "keypad.h"
+#include "lcd.h"
+#include "timer1.h"
+#include "uart.h"
+
+
+uint8 key=0;
+uint8 counter = 0;
+
+uint8 pass[5]={0};
+uint8 confirm[5]={0};
+
+uint8 pass_match=0;
+
+uint8 option = 0;
+uint8 check_pass[5]={0};
+
+uint8 eeprom_match = 0;
+volatile uint8 message_time=0;
+
+uint8 pass_error = 0;
+
+
+
+void main(void){
+	/*********	Timer1_Configuration structure	*********/
+	Timer1_ConfigType Timer1_Configuration = {0, 1000, PRESCALER_1024, CTC};
+
+	/*********	UART_Configuration structure	*********/
+	UART_ConfigType	  UART_Configuration = {EIGHT_DATA_BITS, DISABLED_PARITY, ONE_STOP_BIT, 9600};
+
+	UART_init(&UART_Configuration);	//Initialize UART
+	LCD_init();						//Initialize LCD
+
+	Timer1_setCallBack(messageTimer);
+
+	while(1){
+		/****	Make PASS and CONFIRMATION PAASS for first time ****/
+		while(pass_match == 0){				//Passwords matching result is set to zero initially to enter the while loop
+			create_pass();					//matched if matched will exit the loop if not will repeat it
+			send_pass(pass);
+			send_confirm(confirm);
+			while(UART_recieveByte()!= CHECK){}
+			UART_sendByte(MC1_READY);
+			pass_match = UART_recieveByte();
+		}
+
+		option_screen();
+
+		if(eeprom_match == 0 && pass_error == 3){
+			Timer1_init(&Timer1_Configuration);
+			message_time = 0;
+			LCD_clearScreen();
+			LCD_moveCursor(0,0);
+			LCD_displayString("Error");
+			while(message_time < 5){
+			}
+			Timer1_deInit();
+			pass_error = 0;
+		}
+
+		if(eeprom_match == 1 && option == '+'){
+			Timer1_init(&Timer1_Configuration);
+			message_time = 0;
+			LCD_clearScreen();
+			Door_Unlocking();
+			while(message_time < 18){
+			}
+			message_time = 0;
+			LCD_clearScreen();
+			Door_Locking();
+			while(message_time < 15){
+			}
+			LCD_clearScreen();
+			Timer1_deInit();
+		}
+		else if(eeprom_match == 1 && option == '-'){
+			pass_match = 0;
+			LCD_clearScreen();
+		}
+		eeprom_match = 0;
+	}
+}
+/***********************************  Function Definition  ***************************************/
+
+void messageTimer(void){
+	message_time++;
+}
+
+void create_pass(void){
+	key = 0;
+	counter = 0;
+	LCD_moveCursor(0,0);
+	LCD_displayString("Plz enter pass:");
+	LCD_moveCursor(1,0);
+	while(key != '%'){
+		key = KEYPAD_getPressedKey();
+		if(key != '%'){
+			LCD_displayCharacter('*');
+			pass[counter] = key;
+		}
+		counter++;
+		_delay_ms(500);
+	}
+	key = 0;
+	counter = 0;
+	LCD_clearScreen();
+	LCD_moveCursor(0,0);
+	LCD_displayString("Plz re-enter the");
+	LCD_moveCursor(1,0);
+	LCD_displayString("same pass:");
+	LCD_moveCursor(1,11);
+	while(key != '%'){
+		key = KEYPAD_getPressedKey();
+		if(key != '%'){
+			LCD_displayCharacter('*');
+			confirm[counter] = key;
+		}
+		counter++;
+		_delay_ms(500);
+	}
+}
+
+void option_screen(void){
+	pass_error = 0;
+	LCD_clearScreen();
+	LCD_moveCursor(0,0);
+	LCD_displayString("+:Open the Door");
+	LCD_moveCursor(1,0);
+	LCD_displayString("-:Change Pass");
+	key = KEYPAD_getPressedKey();
+	option = key;
+	_delay_ms(500);
+	UART_sendByte(OPTION);						// Prepare CONTROL_ECU for option instruction
+	while(UART_recieveByte() != MC2_READY){}	// Wait for CONTROL_ECU to be ready
+	UART_sendByte(option);						// Send the option
+
+	if(key == '+' || key == '-'){
+		while(eeprom_match == 0 && pass_error < 3 ){
+
+			key = 0;
+			counter = 0;
+			LCD_clearScreen();
+			LCD_moveCursor(0,0);
+			LCD_displayString("Plz enter pass:");
+			LCD_moveCursor(1,0);
+			while(key != '%'){
+				key = KEYPAD_getPressedKey();
+				if(key != '%'){
+					LCD_displayCharacter('*');
+					check_pass[counter] = key;
+				}
+				counter++;
+				_delay_ms(500);
+			}
+
+			while(UART_recieveByte() != MC2_READY){}	// Wait for the CONTROL_ECU to be ready
+			UART_sendByte(PASS_READY);					// Prepare CONTROL_ECU for the check_pass
+			while(UART_recieveByte() != MC2_READY){}	// Wait for the CONTROL_ECU to be ready
+
+			for(counter = 0; counter<5; counter++){		// Send the check_pass
+				UART_sendByte(check_pass[counter]);
+			}
+			while(UART_recieveByte()!= CHECK){}			// Wait for the CHECK instruction
+			UART_sendByte(MC1_READY);					// Sending ready to receive the match result from CONTROL_ECU
+			eeprom_match = UART_recieveByte();			// Receive the result of password matching
+				pass_error++;
+		}
+	}
+}
+void Door_Locking(void){
+	LCD_moveCursor(0,0);
+	LCD_displayString("Door Locking");
+}
+void Door_Unlocking(void){
+	LCD_moveCursor(0,0);
+	LCD_displayString("Door Unlocking");
+}
+void send_pass(uint8 arr[]){
+	UART_sendByte(PASS_READY);
+	while(UART_recieveByte() != MC2_READY){}
+	for(counter = 0; counter<5; counter++){
+		UART_sendByte(pass[counter]);
+	}
+}
+void send_confirm(uint8 arr[]){
+	UART_sendByte(CONFIRM_READY);
+	while(UART_recieveByte() != MC2_READY){}
+	for(counter = 0; counter<5; counter++){
+		UART_sendByte(confirm[counter]);
+	}
+}

@@ -1,0 +1,57 @@
+14:48:43 **** Build of configuration Debug for project Challenge1_MC2 ****
+make all 
+Building file: ../MC2.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"MC2.d" -MT"MC2.o" -c -o "MC2.o" "../MC2.c"
+Finished building: ../MC2.c
+ 
+Building file: ../gpio.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"gpio.d" -MT"gpio.o" -c -o "gpio.o" "../gpio.c"
+Finished building: ../gpio.c
+ 
+Building file: ../lcd.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"lcd.d" -MT"lcd.o" -c -o "lcd.o" "../lcd.c"
+In file included from ../lcd.c:13:
+c:/winavr-20100110/lib/gcc/../../avr/include/util/delay.h:90:3: warning: #warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+../lcd.c: In function 'LCD_intgerToString':
+../lcd.c:209: warning: implicit declaration of function 'itoa'
+Finished building: ../lcd.c
+ 
+Building file: ../uart.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"uart.d" -MT"uart.o" -c -o "uart.o" "../uart.c"
+Finished building: ../uart.c
+ 
+Building target: Challenge1_MC2.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,Challenge1_MC2.map -mmcu=atmega32 -o "Challenge1_MC2.elf"  ./MC2.o ./gpio.o ./lcd.o ./uart.o   
+Finished building target: Challenge1_MC2.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S Challenge1_MC2.elf  >"Challenge1_MC2.lss"
+Finished building: Challenge1_MC2.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex Challenge1_MC2.elf  "Challenge1_MC2.hex"
+Finished building: Challenge1_MC2.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 Challenge1_MC2.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:   10644 bytes (32.5% Full)
+(.text + .data + .bootloader)
+
+Data:          8 bytes (0.4% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+14:48:44 Build Finished. 0 errors, 2 warnings. (took 1s.11ms)
+

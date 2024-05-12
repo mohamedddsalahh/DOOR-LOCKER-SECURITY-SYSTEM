@@ -1,0 +1,48 @@
+14:48:49 **** Build of configuration Debug for project Exercise2_MC2 ****
+make all 
+Building file: ../MC2.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"MC2.d" -MT"MC2.o" -c -o "MC2.o" "../MC2.c"
+Finished building: ../MC2.c
+ 
+Building file: ../gpio.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"gpio.d" -MT"gpio.o" -c -o "gpio.o" "../gpio.c"
+Finished building: ../gpio.c
+ 
+Building file: ../uart.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=16000000UL -MMD -MP -MF"uart.d" -MT"uart.o" -c -o "uart.o" "../uart.c"
+Finished building: ../uart.c
+ 
+Building target: Exercise2_MC2.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,Exercise2_MC2.map -mmcu=atmega32 -o "Exercise2_MC2.elf"  ./MC2.o ./gpio.o ./uart.o   
+Finished building target: Exercise2_MC2.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S Exercise2_MC2.elf  >"Exercise2_MC2.lss"
+Finished building: Exercise2_MC2.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex Exercise2_MC2.elf  "Exercise2_MC2.hex"
+Finished building: Exercise2_MC2.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 Exercise2_MC2.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:    2488 bytes (7.6% Full)
+(.text + .data + .bootloader)
+
+Data:          0 bytes (0.0% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+14:48:50 Build Finished. 0 errors, 0 warnings. (took 813ms)
+

@@ -1,0 +1,61 @@
+/*
+ * dc_motor.c
+ *
+ *  Created on: Oct 5, 2022
+ *      Author: User
+ */
+
+
+#include"dc_motor.h"
+#include"std_types.h"
+#include"gpio.h"
+#include<avr/io.h>
+
+void Timer0_PWM_Init(unsigned char set_duty_cycle)
+{
+	TCNT0 = 0; // Set Timer Initial Value to 0
+
+	OCR0  = set_duty_cycle; //Set Compare value
+
+	DDRB  = DDRB | (1<<PB3); // Configure PB3/OC0 as output pin --> pin where the PWM signal is generated from MC
+
+	/* Configure timer control register
+	 * 1. Fast PWM mode FOC0=0
+	 * 2. Fast PWM Mode WGM01=1 & WGM00=1
+	 * 3. Clear OC0 when match occurs (non inverted mode) COM00=0 & COM01=1
+	 * 4. clock = F_CPU/8 CS00=0 CS01=1 CS02=0
+	 */
+	TCCR0 = (1<<WGM00) | (1<<WGM01) | (1<<COM01) | (1<<CS02) | (1<<CS00);
+}
+
+void DCMotor_init(void){
+	GPIO_setupPinDirection(PORTB_ID, PIN0_ID, PIN_OUTPUT);
+	GPIO_setupPinDirection(PORTB_ID, PIN1_ID, PIN_OUTPUT);
+	GPIO_setupPinDirection(PORTB_ID, PIN3_ID, PIN_OUTPUT);
+
+	GPIO_writePin(PORTB_ID, PIN0_ID, LOGIC_LOW);			//IN1 Pin
+	GPIO_writePin(PORTB_ID, PIN1_ID, LOGIC_LOW);			//IN2 Pin
+	GPIO_writePin(PORTB_ID, PIN3_ID, LOGIC_LOW);			//Enable Pin
+}
+
+void DcMotor_Rotate(DCMotor_State state, uint8 speed){
+	switch(state){
+	case STOP:
+		GPIO_writePin(PORTB_ID, PIN0_ID, LOGIC_LOW);
+		GPIO_writePin(PORTB_ID, PIN1_ID, LOGIC_LOW);
+		GPIO_writePin(PORTB_ID, PIN3_ID, LOGIC_LOW);
+		break;
+	case CW:
+		GPIO_writePin(PORTB_ID, PIN0_ID, LOGIC_HIGH);
+		GPIO_writePin(PORTB_ID, PIN1_ID, LOGIC_LOW);
+		GPIO_writePin(PORTB_ID, PIN3_ID, LOGIC_HIGH);
+		break;
+	case CCW:
+		GPIO_writePin(PORTB_ID, PIN0_ID, LOGIC_LOW);
+		GPIO_writePin(PORTB_ID, PIN1_ID, LOGIC_HIGH);
+		GPIO_writePin(PORTB_ID, PIN3_ID, LOGIC_HIGH);
+		break;
+	}
+	//uint16 duty = (speed*255)/100;
+	Timer0_PWM_Init(speed);
+}

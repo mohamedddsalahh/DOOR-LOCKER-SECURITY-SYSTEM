@@ -1,0 +1,13 @@
+/*
+ * timer1.c
+ *
+ *  Created on: Nov 1, 2022
+ *      Author: USER
+ */
+#include"std_types.h"
+#include"timer1.h"
+#include<avr/io.h>
+
+
+
+

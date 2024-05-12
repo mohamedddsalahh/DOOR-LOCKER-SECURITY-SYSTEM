@@ -1,0 +1,209 @@
+/*
+ * control.c
+ *
+ *  Created on: Nov 1, 2022
+ *      Author: USER
+ */
+#include"ctrl.h"
+#include<util/delay.h>
+#include"std_types.h"
+
+#include"buzzer.h"
+#include"dc_motor.h"
+#include"uart.h"
+#include"external_eeprom.h"
+#include"timer1.h"
+#include"twi.h"
+
+
+uint8 key = 0;
+uint8 counter = 0;
+uint8 pass_match = 0;
+
+uint8 pass[5]={0};
+uint8 confirm[5]={0};
+
+uint8 eeprom_match = 0;
+uint8 passEEPROM[5] = {0};
+uint8 confirmEEPROM = 0;
+
+uint8 option = 0;
+uint8 check_pass[5]={0};
+volatile unsigned char motor_time = 0;
+uint8 pass_error = 0;
+
+void main(void){
+
+	/*********	Timer1_Configuration structure	*********/
+	Timer1_ConfigType Timer1_Configuration = {0, 1000, PRESCALER_1024, CTC};
+
+	/*********	UART_Configuration structure	*********/
+	UART_ConfigType	  UART_Configuration = {EIGHT_DATA_BITS, DISABLED_PARITY, ONE_STOP_BIT, 9600};
+
+	/*********	TWI_Configuration structure		*********/
+	TWI_ConfigType	  TWI_Configuration = {0b00000010,400000};
+
+	UART_init(&UART_Configuration);		//Initialize UART
+	DCMotor_init();						//Initialize DC Motor
+	TWI_init(&TWI_Configuration);		//Initialize TWI
+	Buzzer_init();						//Initialize Buzzer
+
+
+	Timer1_setCallBack(motorTimer);
+
+
+	while(1){
+		/****	RECIEVE PASS and CONFIRM from HMI_ECU ****/
+
+		while(pass_match == 0){
+			create_pass();			//Call create_pass function to check on passwords
+			UART_sendByte(CHECK);	//Sending CHECK instruction to HMI_ECU
+			while(UART_recieveByte()!= MC1_READY){}	//Wait for MC1_Ready instruction
+			UART_sendByte(pass_match);				//Send the check result whether passwords are matched or not
+
+			if(pass_match == 1){
+				/****** SAVE PASS in EEPROM *******/
+				EEPROM_WRITE_PASS(pass);
+				EEPROM_WRITE_CONFRIM(confirm);
+			}
+		}
+
+		/***** RECIEVE OPTION *****/
+		option_processing();
+
+		/***** Activate Buzzer when Password is entered wrong 3 times *****/
+		if(eeprom_match == 0 && pass_error == 3){
+			Timer1_init(&Timer1_Configuration);	//Initialize Timer1
+			motor_time = 0;						//Set seconds to 0
+			Buzzer_on();						//Activate Buzzer
+			while(motor_time <= 5){				//Delay 5 seconds using Timer1
+			}
+			Timer1_deInit();					//Deactivate Timer1
+			Buzzer_off();						//Deactivate Buzzer
+
+			pass_error = 0;						//Reset Password error variable
+		}
+		/***** Handling the operation chosen by the user if entered password is correct *****/
+		if (eeprom_match == 1 && option == '+'){
+			Timer1_init(&Timer1_Configuration);	//Initialize Timer1
+			motor_time = 0;						//Set seconds to 0
+			DcMotor_Rotate(CW, 255);			//Activate DC Motor
+			while(motor_time < 5){				//Delay 5 seconds using Timer1
+			}
+			motor_time = 0;						//Set seconds to 0 to reset counting
+			DcMotor_Rotate(STOP, 0);			//Deactivate DC Motor
+			while(motor_time < 5){				//Delay 5 seconds using Timer1
+			}
+			motor_time = 0;						//Set seconds to 0 to reset counting
+			DcMotor_Rotate(CW, 255);			//Activate DC Motor
+			while(motor_time < 5){				//Delay 5 seconds using Timer1
+			}
+			DcMotor_Rotate(STOP, 0);			//Deactivate DC Motor
+			Timer1_deInit();					//Deactivate Timer1
+		}
+		else if(eeprom_match == 1 && option == '-'){
+			pass_match = 0;						/***** Reset pass_match to go back to create_pass function *****/
+		}
+
+		eeprom_match = 0;						/***** Reset eeprom_match to go back to option screen *****/
+	}
+
+}
+
+/**********************************	Function Definitions ************************************/
+
+void motorTimer(void){	//SET CALLBACK Function
+	motor_time++;		//Increment number of seconds
+}
+
+void option_processing(void){
+	pass_error = 0;
+	while(UART_recieveByte()!= OPTION){}	// Wait for option instruction
+	UART_sendByte(MC2_READY);				// Send ready to receive the option
+	option = UART_recieveByte();			// Store the option
+	if(option == '+' || option == '-'){
+		while(eeprom_match == 0 && pass_error < 3 ){
+
+			UART_sendByte(MC2_READY);					// Send ready to receive the password
+			while(UART_recieveByte()!= PASS_READY){}	// Wait for password confirmation from HMI_ECU
+			counter = 0;
+			UART_sendByte(MC2_READY);					// Send ready to receive the password
+			for(counter = 0; counter<5; counter++){
+				check_pass[counter] = UART_recieveByte();
+			}
+
+			EEPROM_readByte(PASS_ADDRESS		, passEEPROM);  		/* Read PASS from the external EEPROM */
+			_delay_ms(10);
+			EEPROM_readByte(PASS_ADDRESS+0x8	, passEEPROM+1);  		/* Read PASS from the external EEPROM */
+			_delay_ms(10);
+			EEPROM_readByte(PASS_ADDRESS+0x10	, passEEPROM+2);  		/* Read PASS from the external EEPROM */
+			_delay_ms(10);
+			EEPROM_readByte(PASS_ADDRESS+0x18	, passEEPROM+3);  		/* Read PASS from the external EEPROM */
+			_delay_ms(10);
+			EEPROM_readByte(PASS_ADDRESS+0x20	, passEEPROM+4);  		/* Read PASS from the external EEPROM */
+			_delay_ms(10);
+			for(counter = 0; counter<5; counter++){
+				if(check_pass[0] == passEEPROM[0] ){					// Check if password is correct
+					eeprom_match = 1;
+				}else{
+					eeprom_match = 0;
+					break;
+				}
+			}
+			UART_sendByte(CHECK);					//Send CHECK instruction to HMI_ECU
+			while(UART_recieveByte()!= MC1_READY){}	//Wait for HMI_ECU to be ready
+			UART_sendByte(eeprom_match);			//Send the result of whether the password entered matches EEPROM Pass
+			if(eeprom_match == 0){
+				pass_error++;						//Increment error value (Error limit = 3)
+			}
+		}
+	}
+}
+
+void create_pass(void){
+	while(UART_recieveByte()!= PASS_READY){}	/****	Wait for PASS_READY instruction from HMI_ECU ****/
+	UART_sendByte(MC2_READY);					/****	Send READY	instruction to HMI_ECU to receive PASSWORD	****/
+	for(counter=0; counter<5; counter++){
+		pass[counter] = UART_recieveByte();		/**** Receive PASSWORD form HMI_ECU	****/
+	}
+
+	while(UART_recieveByte()!= CONFIRM_READY){}	/****	Wait for CONFIRM_READY instruction from HMI_ECU ****/
+	UART_sendByte(MC2_READY);					/****	Send READY	instruction to HMI_ECU to receive CONFIRM_PASS	****/
+	for(counter=0; counter<5; counter++){
+		confirm[counter] = UART_recieveByte();
+	}
+
+	for(counter = 0; counter<5; counter++){		/****	Check if the two passwords match	****/
+		if(pass[counter] == confirm[counter]){	//Compare between PASSWORD and CONFIRMATION PASSWORD
+			pass_match = 1;
+		}else{
+			pass_match = 0;
+			break;
+		}
+	}
+}
+
+void EEPROM_WRITE_PASS(uint8 arr[]){
+	EEPROM_writeByte(PASS_ADDRESS		, pass[0]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(PASS_ADDRESS+0x8	, pass[1]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(PASS_ADDRESS+0x10	, pass[2]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(PASS_ADDRESS+0x18	, pass[3]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(PASS_ADDRESS+0x20	, pass[4]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+}
+void EEPROM_WRITE_CONFRIM(uint8 arr[]){
+	EEPROM_writeByte(RECONFIRM_ADDRESS		, pass[0]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(RECONFIRM_ADDRESS+0x8	, pass[1]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(RECONFIRM_ADDRESS+0x10, pass[2]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(RECONFIRM_ADDRESS+0x18, pass[3]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+	EEPROM_writeByte(RECONFIRM_ADDRESS+0x20, pass[4]);  		/* Write PASS in the external EEPROM */
+	_delay_ms(10);
+}

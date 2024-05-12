@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="NewWizardAction">
+		<item key="NewWizardSelectionPage.STORE_SELECTED_ID" value="org.eclipse.cdt.ui.wizards.NewCWizard2"/>
+		<list key="NewWizardSelectionPage.STORE_EXPANDED_CATEGORIES_ID">
+			<item value="org.eclipse.cdt.ui.newCWizards"/>
+		</list>
+	</section>
+	<section name="SmartImportWizard">
+		<item key="SmartImportRootWizardPage.STORE_HIDE_ALREADY_OPEN" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_CLOSE_IMPORTED" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
+		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
+		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+			<item value="D:\Mohamed\Embedded Course\Projects\Project 4\miniProject4"/>
+			<item value="D:\Mohamed\Embedded Course\Drivers\13.I2C\I2C_Eclipse_WS\EEPROM_I2C_Exercise"/>
+			<item value="D:\Mohamed\Embedded Course\Drivers\11.USART\UART_Eclipse_WS"/>
+			<item value="D:\Mohamed\Embedded Course\Projects\Project 3\Project 3\Project_3_Eclipse"/>
+			<item value="D:\Mohamed\Embedded Course\Interfacing 1\4.Timers\Timers_Eclipse_WS"/>
+			<item value="D:\Mohamed\Embedded Course\FinalProject\Control\control"/>
+		</list>
+	</section>
+</section>

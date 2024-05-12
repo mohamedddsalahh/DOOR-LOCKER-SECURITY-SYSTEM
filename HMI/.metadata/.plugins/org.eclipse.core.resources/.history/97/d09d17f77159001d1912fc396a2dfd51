@@ -1,0 +1,37 @@
+/*
+ * timer1.c
+ *
+ *  Created on: Nov 1, 2022
+ *      Author: USER
+ */
+#include"std_types.h"
+#include"timer1.h"
+#include<avr/io.h>
+#include"common_macros.h"
+
+/* Global variables to hold the address of the call back function in the application */
+static volatile void (*g_callBackPtr)(void) = NULL_PTR;
+
+void Timer1_init(const Timer1_ConfigType * Config_Ptr){
+	TCNT1 = (Config_Ptr->initial_value);		/* Set timer1 initial count to initial value */
+	OCR1A = (Config_Ptr->compare_value);		/* Set the Compare value */
+
+	TCCR1A = (((Config_Ptr->mode)& 0b0011)<< WGM10);
+	TCCR1B = (((Config_Ptr->mode)& 0b1100)<< WGM12) | ((Config_Ptr->prescaler)<<CS10);
+
+	TCCR1A = (1<<FOC1A);
+	if((Config_Ptr->mode) == FAST_PWM){
+		CLEAR_BIT(TCCR1A,FOC1A);
+	}
+	TIMSK |= (1<<OCIE1A); /* Enable Timer1 Compare A Interrupt */
+}
+
+void Timer1_deInit(void){
+
+}
+
+void Timer1_setCallBack(void(*a_ptr)(void)){
+	/* Save the address of the Call back function in a global variable */
+		g_callBackPtr = a_ptr;
+}
+

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;ctrl/ctrl.h&apos; to &apos;control.h&apos;" description="Rename resource &apos;ctrl.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ctrl.h" name="control.h" stamp="1667522108311" updateReferences="true"/>
+</session>

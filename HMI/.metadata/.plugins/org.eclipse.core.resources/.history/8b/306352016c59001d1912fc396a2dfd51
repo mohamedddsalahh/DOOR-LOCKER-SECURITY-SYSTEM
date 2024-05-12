@@ -1,0 +1,17 @@
+/*
+ * timer1.h
+ *
+ *  Created on: Nov 1, 2022
+ *      Author: USER
+ */
+
+#ifndef TIMER1_H_
+#define TIMER1_H_
+
+#include "std_types.h"
+
+void Timer1_init(const Timer1_ConfigType * Config_Ptr);
+
+
+
+#endif /* TIMER1_H_ */

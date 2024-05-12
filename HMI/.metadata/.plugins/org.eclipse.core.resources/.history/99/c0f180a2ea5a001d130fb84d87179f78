@@ -1,0 +1,19 @@
+/*
+ * HMI.h
+ *
+ *  Created on: Nov 2, 2022
+ *      Author: USER
+ */
+
+#ifndef HMI_H_
+#define HMI_H_
+
+
+
+
+#define PASS_READY		0x01
+#define	CONFIRM_READY	0x02
+#define MC2_READY 		0x03
+#define CHECK		0x04
+
+#endif /* HMI_H_ */
